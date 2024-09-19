@@ -1,4 +1,4 @@
-'''
+
 # Example file showing a circle moving on screen
 import pygame
 
@@ -42,4 +42,4 @@ while running:
     dt = clock.tick(60) / 1000
 
 pygame.quit()
-'''
+
