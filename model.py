@@ -3,7 +3,7 @@
 import time
 import pygame;
 pygame.init();
-screen = pygame.display.set_mode((600, 400))#(1280, 720));
+screen = pygame.display.set_mode((1280, 720)); #(600, 400))#
 clock = pygame.time.Clock();
 running = True;
 dt = 0;
@@ -33,8 +33,7 @@ class Grid:
     def tick(self):
 
        #check snake segment location
-       #make if statements for each directions
-        print(self.currentDir)
+       #make if statements for each directions=
 
         if self.currentDir=="y+":
             self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()+self.cellLength)
@@ -64,18 +63,29 @@ class SnakeSegment:
     
     ##next segment? the fancy list thing? i don't rememeber how to
 
-    def moveDir(self, newX, newY, create=False):
+    def moveDir(self, newX, newY, create=True):
         oldLoc =self.snake_pos
         self.snake_pos = pygame.Vector2(newX, newY)
 
         if self.next is not None:
-            self.next.moveDir(oldLoc.x, oldLoc.y, create)
+            self.next.moveDir(oldLoc.x, oldLoc.y, create=True)
         else: # we are the last node
             if create:
                 self.next = SnakeSegment(oldLoc.x,oldLoc.y)
+                nextBody = pygame.Rect(self.next.snake_pos, (250,50))
+                pygame.draw.ellipse(screen, "pink",nextBody)
 
 
 
+def draw_snake(snake_head, num):
+    print(num)
+    # draw the current segment
+    numm = num*snakeGrid.cellLength
+    a = pygame.Rect(snake_head.snake_pos, (snakeGrid.cellWidth, snakeGrid.cellLength))
+    pygame.draw.ellipse(screen, "pink", a)
+
+    if not snake_head.next == None:
+        draw_snake(snake_head.next, num+1)
 
 
 
@@ -104,14 +114,13 @@ while running:
                 print("d")
 
     screen.fill("blue")
-    a = pygame.Rect(snakeGrid.snakeHead.snake_pos, (250, 50)); # we will also need to draw the other parts
-    pygame.draw.ellipse(screen, "pink", a)
-    
-    
     snakeGrid.tick() #move
-    time.sleep(2)
-
+    
+    draw_snake(snakeGrid.snakeHead,1)
+    
     pygame.display.flip()
+    
     dt = clock.tick(60) / 1000
+    time.sleep(1)
 
 pygame.quit()
