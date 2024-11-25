@@ -17,12 +17,14 @@ class food:
     def __init__(self, posi):
         self.item = "apple"
         self.pos = posi
+    def getX(self):
+        return self.pos.x;
+    def getY(self):
+        return self.pos.y;
     def drawFood(self):
         foodSHape = pygame.Rect(self.pos, (params.cellWidth,params.cellLength))
         pygame.draw.ellipse(screen, "red", foodSHape)
-    def eatFood(self):
-        #self-destroy? idk
-        pass
+   
 
 
 class Grid:
@@ -39,55 +41,66 @@ class Grid:
         return (params.cellWidth*col) + (params.cellWidth//2);
 
     def changeDirection (self, dir):
-        print("direction changed")
         self.currentDir = dir
 
     def tick(self):
+
        #check snake segment location
        #make if statements for each directions=
         colRand = random.randint(0,params.numCols);
         rowRand = random.randint(0,params.numRows);
         v = pygame.Vector2(self.getLocationX(colRand), self.getLocationY(rowRand));
 
-        create = False;
+        createMORE = False;
         x1 = self.snakeHead.getX()
         y1 = self.snakeHead.getY()
+        w1 = params.cellWidth;
+        h1 = params.cellLength;
+
+        for foodyum in self.foodlist:
+            x2 = foodyum.getX()
+            y2 = foodyum.getY()
+            
+            #right now i have h1, w1 = h2, w2 but that might change in future
+            if intersect(x1,y1,w1,h1,x2,y2,h1,w1):
+                self.foodlist.remove(foodyum)
+                #print("INTERSECT WITH FOOD YAY")
+                createMORE = True
+
 
         global rotation
+        if len(self.foodlist) < 1:
+            f = food(v)
+            self.foodlist.append(f)
         if rotation == 1:
             f = food(v)
             self.foodlist.append(f)
+
         if self.currentDir=="y+":
-            self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()+params.cellLength)
+            self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()+params.cellLength, create=createMORE)
         elif self.currentDir =="y-":
-            self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()-params.cellLength)
+            self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()-params.cellLength, create=createMORE)
         elif self.currentDir =="x+":
-            self.snakeHead.moveDir(self.snakeHead.getX()+params.cellWidth, self.snakeHead.getY())
+            self.snakeHead.moveDir(self.snakeHead.getX()+params.cellWidth, self.snakeHead.getY(), create=createMORE)
         else:
-            self.snakeHead.moveDir(self.snakeHead.getX()-params.cellWidth, self.snakeHead.getY())
+            self.snakeHead.moveDir(self.snakeHead.getX()-params.cellWidth, self.snakeHead.getY(), create=createMORE)
         rotation+=1;
-        rotation %= 8
+        rotation %= 7
+
+        createMORE = False
 
 
 
 
 
 def intersect (x1,y1,w1,h1,x2,y2,w2,h2):
-    xInt, yInt = False, False;
-    if x2>x1:
-        if (x1+w1)>x2:
-            xInt = True
-    elif x1>x2:
-        if x2+w2 > x1:
-            xInt = True
-    
-    if y2>y1:
-        if (y1+h1)>y2:
-            yInt = True
-    elif y1>y2:
-        if y2+h2 > y1:
-            yInt = True
-    return xInt and yInt;
+    if x1 + w1 < x2 or x2 + w2 < x1:
+        #if one is completely to the right/left of other
+        return False;
+    if y1 + h1 < y2 or y2 + h2 < y1:
+        #if one is compeltely above/below other
+        return False;
+    return True;
 
 
 class SnakeSegment:
@@ -108,7 +121,7 @@ class SnakeSegment:
         self.snake_pos = pygame.Vector2(newX, newY)
 
         if self.next is not None:
-            self.next.moveDir(oldLoc.x, oldLoc.y, create=True)
+            self.next.moveDir(oldLoc.x, oldLoc.y, create=create)
         else: # we are the last node
             if create:
                 self.next = SnakeSegment(oldLoc.x,oldLoc.y)
@@ -118,11 +131,15 @@ class SnakeSegment:
 
 
 def draw_snake(snake_head, num):
-    print(num)
+    if num == 1:
+        color = "black"#make head a dif color for better gameplay i think
+    else:
+        color = "pink"
+    ##print(num)
     # draw the current segment
     numm = num*params.cellLength
     a = pygame.Rect(snake_head.snake_pos, (params.cellWidth, params.cellLength))
-    pygame.draw.ellipse(screen, "pink", a)
+    pygame.draw.ellipse(screen, color, a)
 
     if not snake_head.next == None:
         draw_snake(snake_head.next, num+1)
@@ -140,18 +157,18 @@ while running:
     
         if event.type == pygame.KEYDOWN:
             if event.key==pygame.K_w:
-                print("w")
+                #print("w")
                 snakeGrid.changeDirection("y-");
             if event.key==pygame.K_s:
                 snakeGrid.changeDirection ("y+");
             
-                print("s")
+                #print("s")
             if event.key==pygame.K_a:
                 snakeGrid.changeDirection("x-");
-                print("a")
+                #print("a")
             if event.key==pygame.K_d:
                 snakeGrid.changeDirection ("x+");
-                print("d")
+                #print("d")
 
     screen.fill("blue")
     snakeGrid.tick() #move
@@ -163,7 +180,7 @@ while running:
     
     pygame.display.flip()
     
-    dt = clock.tick(60) / 1000
-    time.sleep(1)
+    dt = clock.tick(100) / 1000
+    time.sleep(.5)
 
 pygame.quit()
