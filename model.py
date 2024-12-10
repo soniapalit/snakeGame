@@ -44,7 +44,6 @@ class Grid:
         self.currentDir = dir
 
     def tick(self):
-
        #check snake segment location
        #make if statements for each directions=
         colRand = random.randint(0,params.numCols);
@@ -57,37 +56,45 @@ class Grid:
         w1 = params.cellWidth;
         h1 = params.cellLength;
 
-        for foodyum in self.foodlist:
-            x2 = foodyum.getX()
-            y2 = foodyum.getY()
-            
-            #right now i have h1, w1 = h2, w2 but that might change in future
-            if intersect(x1,y1,w1,h1,x2,y2,h1,w1):
-                self.foodlist.remove(foodyum)
-                #print("INTERSECT WITH FOOD YAY")
-                createMORE = True
+        if not hitwall(x1,y1,w1,h1, snakeGrid.currentDir):
+
+            for foodyum in self.foodlist:
+                x2 = foodyum.getX()
+                y2 = foodyum.getY()
+                
+                #right now i have h1, w1 = h2, w2 but that might change in future
+                if intersect(x1,y1,w1,h1,x2,y2,h1,w1):
+                    self.foodlist.remove(foodyum)
+                    #print("INTERSECT WITH FOOD YAY")
+                    createMORE = True
 
 
-        global rotation
-        if len(self.foodlist) < 1:
-            f = food(v)
-            self.foodlist.append(f)
-        if rotation == 1:
-            f = food(v)
-            self.foodlist.append(f)
+            global rotation
+            print(len(self.foodlist))
+            if len(self.foodlist) < 1:
+                f = food(v)
+                self.foodlist.append(f)
+                len(self.foodlist)
+            if rotation == 1:
+                f = food(v)
+                self.foodlist.append(f)
 
-        if self.currentDir=="y+":
-            self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()+params.cellLength, create=createMORE)
-        elif self.currentDir =="y-":
-            self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()-params.cellLength, create=createMORE)
-        elif self.currentDir =="x+":
-            self.snakeHead.moveDir(self.snakeHead.getX()+params.cellWidth, self.snakeHead.getY(), create=createMORE)
+            if self.currentDir=="y+":
+                self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()+params.cellLength, create=createMORE)
+            elif self.currentDir =="y-":
+                self.snakeHead.moveDir(self.snakeHead.getX(), self.snakeHead.getY()-params.cellLength, create=createMORE)
+            elif self.currentDir =="x+":
+                self.snakeHead.moveDir(self.snakeHead.getX()+params.cellWidth, self.snakeHead.getY(), create=createMORE)
+            else:
+                self.snakeHead.moveDir(self.snakeHead.getX()-params.cellWidth, self.snakeHead.getY(), create=createMORE)
+            rotation+=1;
+            rotation %= 7
+
+            createMORE = False
         else:
-            self.snakeHead.moveDir(self.snakeHead.getX()-params.cellWidth, self.snakeHead.getY(), create=createMORE)
-        rotation+=1;
-        rotation %= 7
+            screen.fill("red")
+            print("wall hit")
 
-        createMORE = False
 
 
 
@@ -101,6 +108,25 @@ def intersect (x1,y1,w1,h1,x2,y2,w2,h2):
         #if one is compeltely above/below other
         return False;
     return True;
+
+
+def hitwall (x1,y1, w1, h1, moveDirection):
+    if moveDirection == "y+":
+        #going up
+        if y1<=0:
+            return True;
+    if moveDirection == "y-":
+        #going down
+        if y1+h1>=params.screenH:
+            return True;
+    if moveDirection == "x+":
+        #going right
+        if x1+w1>=params.screenW:
+            return True;
+    if moveDirection == "x-":
+        #going left
+        if x1<=0:
+            return True;
 
 
 class SnakeSegment:
