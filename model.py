@@ -96,8 +96,10 @@ class Grid:
             print("wall hit")
 
 
-
-
+def restartSnakeGameAww():
+    global snakeGrid
+    snakeGrid = Grid()
+    screen.fill("blue")
 
 
 def intersect (x1,y1,w1,h1,x2,y2,w2,h2):
@@ -172,7 +174,7 @@ def draw_snake(snake_head, num):
 
 
 
-
+global snakeGrid
 snakeGrid = Grid();
 
 
@@ -208,5 +210,14 @@ while running:
     
     dt = clock.tick(100) / 1000
     time.sleep(.5)
+
+    x1 = snakeGrid.snakeHead.getX()
+    y1 = snakeGrid.snakeHead.getY()
+    w1 = params.cellWidth
+    h1 = params.cellLength
+
+    if hitwall(x1, y1, w1, h1, snakeGrid.currentDir):
+        time.sleep(2)
+        restartSnakeGameAww()
 
 pygame.quit()
